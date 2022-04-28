@@ -1,0 +1,12 @@
+{
+  "name": "Aeroplane-Chess",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/WhiteNightAWA/Aeroplane-Chess.git",
+  "author": "White Night awa <evan.tang.2021@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.0",
+    "websocket": "^1.0.34"
+  }
+}
