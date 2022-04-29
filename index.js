@@ -1,9 +1,18 @@
 const http = require("http");
 
-// const app = require("express")();
-// app.get("/", (req,res)=> res.sendFile(__dirname + "/index.html"))
-//
-// app.listen(9091, ()=>console.log("Listening on http port 9091"))
+const express = require("express");
+// const bodyParser = require("body-parser");
+// const cors = require("cors");
+const path = __dirname + '/html/dist/';
+const app = express();
+app.use(express.static(path));
+app.get('/', function (req,res) {
+    res.sendFile(path + "index.html");
+});
+const PORT = process.env.PORT || 9091;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}.`);
+});
 
 const websocketServer = require("websocket").server
 const httpServer = http.createServer();

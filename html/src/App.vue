@@ -180,7 +180,7 @@ export default {
   data() {
     return {
       clientId: null,
-      ws: new WebSocket("ws://localhost:9090"),
+      ws: new WebSocket(`ws://${document.location.hostname}:9090`),
       game: null,
       errDia: false,
       err: "",
