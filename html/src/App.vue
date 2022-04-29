@@ -71,7 +71,7 @@
                 <v-icon v-if="!showGameId">mdi-eye</v-icon>
                 <v-icon v-else>mdi-eye-off</v-icon>
               </v-btn>
-              <v-btn icon @click="copy(`https://${urlHost}/?joinId=${game.id}`)"><v-icon>mdi-content-copy</v-icon></v-btn>
+              <v-btn icon @click="copy(`${urlHost}?joinId=${game.id}`)"><v-icon>mdi-content-copy</v-icon></v-btn>
             </v-alert>
           </v-container>
         </v-tab-item>
@@ -199,7 +199,7 @@ export default {
       snackbarMessage: "test",
       snackbarIcon: "check",
       messages: [],
-      urlHost: document.location.host
+      urlHost: document.location.href
     }
   },
 
