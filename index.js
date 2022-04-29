@@ -178,12 +178,13 @@ wsServer.on("request", request => {
 
     const clientId = guid();
     clients[clientId] = {
-        "connection":  connection
+        connection:  connection,
+        game: null
     }
 
     const payLoad = {
-        "method": "connect",
-        "clientId": clientId
+        method: "connect",
+        clientId: clientId
     }
     connection.send(JSON.stringify(payLoad))
 

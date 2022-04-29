@@ -180,7 +180,7 @@ export default {
   data() {
     return {
       clientId: null,
-      ws: new WebSocket(`ws://aeroplane-chess.vercel.app`),
+      ws: new WebSocket(`wss://desert-smart-apology.glitch.me/`),
       game: null,
       errDia: false,
       err: "",
