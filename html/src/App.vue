@@ -34,6 +34,7 @@
                   label="Game ID"
                   v-model="inputGameId"
                   type="password"
+                  v-on:keyup.enter="inputGameId === '' ? null : join()"
               />
               <v-btn @click="join()" :disabled="inputGameId === ''">JOIN</v-btn>
               <v-spacer/>
@@ -46,11 +47,12 @@
               <v-text-field
                   label="Your name"
                   v-model="editName"
+                  v-on:keyup.enter="updateName()"
               >
                 <template v-slot:append-outer>
                   <v-btn
                       :disabled="orgName === editName"
-                      @click="updateName"
+                      @click="updateName()"
                       icon
                   >
                     <v-icon>
@@ -80,11 +82,12 @@
               <v-text-field
                   label="Your name"
                   v-model="editName"
+                  v-on:keyup.enter="updateName()"
               >
                 <template v-slot:append-outer>
                   <v-btn
                       :disabled="orgName === editName"
-                      @click="updateName"
+                      @click="updateName()"
                       icon
                   >
                     <v-icon>
@@ -127,6 +130,7 @@
                     <v-icon
                         v-if="u.host"
                         color="yellow"
+                        large
                     >
                       mdi-crown
                     </v-icon>
@@ -278,8 +282,10 @@ export default {
       }
       if (res.method === "updateName") {
         this.game = res.game;
-        this.editName = res.name
-        this.orgName = this.editName
+        if (this.editName === res.name) {
+          this.editName = res.name;
+          this.orgName = this.editName;
+        }
       }
       if (res.method === "kick") {
         if (res.clientId === this.clientId) {

@@ -45,6 +45,7 @@
           <v-text-field
               outlined
               v-model="message"
+              v-on:keyup.enter="message === '' ? null : sendMessage()"
           >
             <template v-slot:append-outer>
               <v-btn
