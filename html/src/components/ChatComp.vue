@@ -69,7 +69,6 @@
 export default {
   name: "ChatComp",
   props: {
-    _ws: WebSocket,
     client: String,
     gameId: String,
     m: Array
@@ -77,7 +76,7 @@ export default {
   data() {
     return {
       message: "",
-      ws: this._ws,
+      ws: this.$root.ws,
       clientId: this.client,
     }
   },

@@ -4,7 +4,13 @@
       app
       color="primary"
     >
-      <h1 class="white--text">Aeroplane Chess</h1>
+      <a href="https://whitenightawa.github.io/Aeroplane-Chess/">
+        <v-icon x-large>mdi-chess-pawn</v-icon>
+      </a>
+      <a href="https://whitenightawa.github.io/Aeroplane-Chess/">
+        <h1 class="white--text">Aeroplane Chess</h1>
+      </a>
+
       <v-spacer/>
       <v-subheader class="white--text">
         Your client ID: <code v-if="clientId !== null">{{ clientId }}</code><code v-else>Getting Id...</code>
@@ -95,6 +101,17 @@
                   </v-btn>
                 </template>
               </v-text-field>
+              <v-alert type="info" prominent>
+                Your game id will be
+                <code v-if="game !== null" style="user-select: none;">
+                  <span :class="{ white: !showGameId }">{{ game.id }}</span>
+                </code>
+                <v-btn icon @click="showGameId = !showGameId">
+                  <v-icon v-if="!showGameId">mdi-eye</v-icon>
+                  <v-icon v-else>mdi-eye-off</v-icon>
+                </v-btn>
+                <v-btn icon @click="copy(`${urlHost}?joinId=${game.id}`)"><v-icon>mdi-content-copy</v-icon></v-btn>
+              </v-alert>
             </v-card>
             <v-progress-circular class="ma-6" indeterminate color="primary" size="100"/>
             <h2>Waiting the host to start</h2>
@@ -147,7 +164,7 @@
               </v-list>
             </v-expansion-panel-content>
           </v-expansion-panel>
-          <ChatComp :m.sync="messages" :gameId="game.id" :client="clientId" :_ws="ws"/>
+          <ChatComp :m.sync="messages" :gameId="game.id" :client="clientId"/>
         </v-expansion-panels>
       </v-card>
       <v-snackbar
@@ -183,7 +200,7 @@ export default {
   data() {
     return {
       clientId: null,
-      ws: new WebSocket(`wss://desert-smart-apology.glitch.me/`),
+      ws: this.$root.ws,
       game: null,
       errDia: false,
       err: "",

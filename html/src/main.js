@@ -6,5 +6,10 @@ Vue.config.productionTip = false
 
 new Vue({
   vuetify,
-  render: h => h(App)
+  render: h => h(App),
+  data() {
+    return {
+      ws: new WebSocket(`wss://desert-smart-apology.glitch.me/`)
+    }
+  }
 }).$mount('#app')
