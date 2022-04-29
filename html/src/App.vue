@@ -9,7 +9,7 @@
       <v-subheader class="white--text">
         Your client ID: <code v-if="clientId !== null">{{ clientId }}</code><code v-else>Getting Id...</code>
       </v-subheader>
-      <v-btn icon @click="$vuetify.theme.dark = !$vuetify.theme.dark">
+      <v-btn icon @click="changeTheme()">
         <v-icon v-if="$vuetify.theme.dark" class="white--text">mdi-white-balance-sunny</v-icon>
         <v-icon v-else class="white--text">mdi-weather-night</v-icon>
       </v-btn>
@@ -71,8 +71,7 @@
                 <v-icon v-if="!showGameId">mdi-eye</v-icon>
                 <v-icon v-else>mdi-eye-off</v-icon>
               </v-btn>
-              <v-btn icon @click="copy(game.id)"><v-icon>mdi-content-copy</v-icon></v-btn>
-
+              <v-btn icon @click="copy(`https://${urlHost}/?joinId=${game.id}`)"><v-icon>mdi-content-copy</v-icon></v-btn>
             </v-alert>
           </v-container>
         </v-tab-item>
@@ -199,11 +198,16 @@ export default {
       snackbarColor: "success",
       snackbarMessage: "test",
       snackbarIcon: "check",
-      messages: []
+      messages: [],
+      urlHost: document.location.host
     }
   },
 
   methods: {
+    changeTheme: function () {
+      this.$vuetify.theme.dark = !this.$vuetify.theme.dark
+      window.localStorage.setItem("isDark", this.$vuetify.theme.dark.toString())
+    },
     updateName: function () {
       const payload = {
         clientId: this.clientId,
@@ -247,6 +251,23 @@ export default {
   },
 
   mounted() {
+
+    // theme
+    let isDark = window.localStorage.getItem("isDark");
+    if (isDark === null) {
+      isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+      window.localStorage.setItem("isDark", isDark.toString())
+      this.$vuetify.theme.dark = isDark
+    } else {
+      this.$vuetify.theme.dark = isDark === "true"
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+      isDark = !event.matches
+      window.localStorage.setItem("isDark", isDark.toString())
+      this.$vuetify.theme.dark = isDark  === "true"
+    });
+
+    // ws
     this.ws.onmessage = m => {
       const res = JSON.parse(m.data)
       console.log(res);
@@ -256,6 +277,14 @@ export default {
         this.snackbarMessage = "Connected to ws server!"
         this.snackbarColor = "success"
         this.snackbar = true
+
+        // join link
+        const params = Object.fromEntries(new URLSearchParams(window.location.search));
+        if (params.joinId !== undefined) {
+          this.inputGameId = params.joinId
+          this.join()
+          window.history.replaceState(null, null, "?");
+        }
       }
       if (res.method === "create") {
         console.log(res.game)

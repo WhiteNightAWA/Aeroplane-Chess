@@ -11,5 +11,6 @@ module.exports = defineConfig({
       ? '/Aeroplane-Chess/'
       : '/',
 
-  outputDir: path.resolve(__dirname + "../docs")
+  outputDir: path.resolve("./../docs")
+
 })
