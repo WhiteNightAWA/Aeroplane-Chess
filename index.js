@@ -1,22 +1,23 @@
 const http = require("http");
 
-const express = require("express");
+// const express = require("express");
 // const bodyParser = require("body-parser");
 // const cors = require("cors");
-const path = __dirname + '/html/dist/';
-const app = express();
-app.use(express.static(path));
-app.get('/', function (req,res) {
-    res.sendFile(path + "index.html");
-});
-const PORT = process.env.PORT || 9091;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}.`);
-});
+// const path = __dirname + '/html/dist/';
+// const app = express();
+// app.use(express.static(path));
+// app.get('/', function (req,res) {
+//     res.sendFile(path + "index.html");
+// });
+// const PORT = process.env.PORT || 9091;
+// app.listen(PORT, () => {
+//     console.log(`Server is running on port ${PORT}.`);
+// });
 
+const SERVER_PORT = process.env.PORT || 9091;
 const websocketServer = require("websocket").server
 const httpServer = http.createServer();
-httpServer.listen(9090, () => console.log("Listening.. on 9090"))
+httpServer.listen(SERVER_PORT, () => console.log("Listening.. on 9090"))
 const clients = {};
 const games = {};
 
