@@ -22,7 +22,6 @@
     </v-app-bar>
 
     <v-main>
-      {{ game }}
       <v-tabs-items v-model="page" class="fill-height">
         <v-tab-item value="select" class="fill-height">
           <v-container class="fill-height justify-space-around flex-column">
@@ -50,57 +49,6 @@
         <v-tab-item value="create" class="fill-height">
           <v-container class="fill-height justify-center flex-column">
             <v-card class="pa-4 ma-4">
-              <v-text-field
-                  label="Your name"
-                  v-model="editName"
-                  v-on:keyup.enter="updateName()"
-              >
-                <template v-slot:append-outer>
-                  <v-btn
-                      :disabled="orgName === editName"
-                      @click="updateName()"
-                      icon
-                  >
-                    <v-icon>
-                      mdi-content-save
-                    </v-icon>
-                  </v-btn>
-                </template>
-              </v-text-field>
-            </v-card>
-            <v-alert type="info" prominent>
-              Your game id will be
-              <code v-if="game !== null" style="user-select: none;">
-                <span :class="{ white: !showGameId }">{{ game.id }}</span>
-              </code>
-              <v-btn icon @click="showGameId = !showGameId">
-                <v-icon v-if="!showGameId">mdi-eye</v-icon>
-                <v-icon v-else>mdi-eye-off</v-icon>
-              </v-btn>
-              <v-btn icon @click="copy(`${urlHost}?joinId=${game.id}`)"><v-icon>mdi-content-copy</v-icon></v-btn>
-            </v-alert>
-          </v-container>
-        </v-tab-item>
-        <v-tab-item value="wait" class="fill-height">
-          <v-container class="fill-height flex-column justify-center align-center" v-if="game !== null">
-            <v-card class="pa-4 ma-4">
-              <v-text-field
-                  label="Your name"
-                  v-model="editName"
-                  v-on:keyup.enter="updateName()"
-              >
-                <template v-slot:append-outer>
-                  <v-btn
-                      :disabled="orgName === editName"
-                      @click="updateName()"
-                      icon
-                  >
-                    <v-icon>
-                      mdi-content-save
-                    </v-icon>
-                  </v-btn>
-                </template>
-              </v-text-field>
               <v-alert type="info" prominent>
                 Your game id will be
                 <code v-if="game !== null" style="user-select: none;">
@@ -111,6 +59,107 @@
                   <v-icon v-else>mdi-eye-off</v-icon>
                 </v-btn>
                 <v-btn icon @click="copy(`${urlHost}?joinId=${game.id}`)"><v-icon>mdi-content-copy</v-icon></v-btn>
+              </v-alert>
+              <v-alert class="mb-0">
+                <v-text-field
+                    label="Your name"
+                    v-model="editName"
+                    v-on:keyup.enter="updateName()"
+                >
+                  <template v-slot:append-outer>
+                    <v-btn
+                        :disabled="orgName === editName"
+                        @click="updateName()"
+                        icon
+                    >
+                      <v-icon>
+                        mdi-content-save
+                      </v-icon>
+                    </v-btn>
+                  </template>
+                </v-text-field>
+              </v-alert>
+
+              <v-expansion-panels>
+                <v-expansion-panel class="pa-4 ma-4">
+                  <v-expansion-panel-header>
+                    Game Settings
+                  </v-expansion-panel-header>
+                  <v-divider/>
+                  <v-expansion-panel-content>
+                    <v-form class="ma-3">
+                      <v-row>
+                        <v-col>
+                          <v-select
+                              :items="settings.games"
+                              v-model="settings.game"
+                              label="Game"
+                              filled
+                              hide-details
+                          />
+                        </v-col>
+                      </v-row>
+                      <v-row>
+                        <v-col cols="3">
+                          <v-text-field
+                            v-model="settings.playerNumbers"
+                            type="number"
+                            filled
+                            min="2"
+                            max="4"
+                            hide-details
+                          />
+                        </v-col>
+                        <v-col>
+                          <v-row>
+<!--                            <v-col-->
+<!--                              v-for="n in settings.num"-->
+<!--                              :key="n"-->
+<!--                            >-->
+<!--                              {{ JSON.stringify(n) }}-->
+<!--                            </v-col>-->
+                          </v-row>
+                        </v-col>
+                      </v-row>
+                    </v-form>
+                  </v-expansion-panel-content>
+                </v-expansion-panel>
+              </v-expansion-panels>
+            </v-card>
+          </v-container>
+        </v-tab-item>
+        <v-tab-item value="wait" class="fill-height">
+          <v-container class="fill-height flex-column justify-center align-center" v-if="game !== null">
+            <v-card class="pa-4 ma-4">
+              <v-alert type="info" prominent>
+                Your game id will be
+                <code v-if="game !== null" style="user-select: none;">
+                  <span :class="{ white: !showGameId }">{{ game.id }}</span>
+                </code>
+                <v-btn icon @click="showGameId = !showGameId">
+                  <v-icon v-if="!showGameId">mdi-eye</v-icon>
+                  <v-icon v-else>mdi-eye-off</v-icon>
+                </v-btn>
+                <v-btn icon @click="copy(`${urlHost}?joinId=${game.id}`)"><v-icon>mdi-content-copy</v-icon></v-btn>
+              </v-alert>
+              <v-alert>
+                <v-text-field
+                    label="Your name"
+                    v-model="editName"
+                    v-on:keyup.enter="updateName()"
+                >
+                  <template v-slot:append-outer>
+                    <v-btn
+                        :disabled="orgName === editName"
+                        @click="updateName()"
+                        icon
+                    >
+                      <v-icon>
+                        mdi-content-save
+                      </v-icon>
+                    </v-btn>
+                  </template>
+                </v-text-field>
               </v-alert>
             </v-card>
             <v-progress-circular class="ma-6" indeterminate color="primary" size="100"/>
@@ -129,7 +178,7 @@
           </v-card-title>
         </v-card>
       </v-dialog>
-      <v-card class="userComp" v-if="game !== null">
+      <v-card class="userComp" v-if="game !== null" style="z-index: 999;">
         <v-expansion-panels accordion multiple>
           <v-expansion-panel>
             <v-expansion-panel-header>
@@ -216,7 +265,14 @@ export default {
       snackbarMessage: "test",
       snackbarIcon: "check",
       messages: [],
-      urlHost: document.location.href
+      urlHost: document.location.href,
+      settings: {
+        games: [
+          "Aeroplane Chess"
+        ],
+        game: "",
+        playerNumbers: 2,
+      }
     }
   },
 
