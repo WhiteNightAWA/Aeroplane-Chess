@@ -30,6 +30,7 @@
                       :items="settings.games[settings.game].players"
                       filled
                       hide-details
+                      @change="editPlayerNumber()"
                   />
                 </v-col>
                 <v-col>
@@ -174,7 +175,8 @@ export default {
   },
   props: {
     g: Object,
-    c: String
+    c: String,
+    pN: Number
   },
   data() {
     return {
@@ -183,7 +185,6 @@ export default {
           AeroplaneChess: {id: "AeroplaneChess", name: "Aeroplane Chess", players: [2,3,4]}
         },
         game: "",
-        playerNumbers: 2,
         colors: ["#ffdd00", "#1976D2", "#ee0c0c", "#55AA00"],
         moves: [2, 4, 6],
         timeLimited: false,
@@ -195,6 +196,7 @@ export default {
         ableFly: true,
         ableOverLuckyPunish: true,
         userSelectColor: false,
+        playerNumbers: 4,
       },
     }
   },
@@ -214,7 +216,7 @@ export default {
       set(val){
         this.$emit('update:c',val)
       }
-    }
+    },
   },
   methods: {
     updateUserSelectColor: function () {
@@ -222,6 +224,14 @@ export default {
         method: "updateUserSelectColor",
         gameId: this.game.id,
         able: this.settings.userSelectColor
+      }
+      this.$root.ws.send(JSON.stringify(payload))
+    },
+    editPlayerNumber: function () {
+      const payload = {
+        method: "updatePlayerNumber",
+        newNumber: this.settings.playerNumbers,
+        gameId: this.game.id
       }
       this.$root.ws.send(JSON.stringify(payload))
     }

@@ -31,21 +31,34 @@ wsServer.on("request", request => {
     connection.on("close", () => {
         const client = clients[clientId];
         if (client.game !== null) {
-            const game = games[client.game]
-            const name = game.clients.find(c => c.clientId === clientId).name
+            const game = games[client.game];
+            const player = game.clients.find(c => c.clientId === clientId);
+            const name = player.name;
+
             game.clients = game.clients.filter(c => c.clientId !== clientId)
 
-            const payload = {
-                method: "left",
-                game: game,
-                name: name
+            let payload = {};
+            if (player.host) {
+                payload = {
+                    method: "close"
+                }
+            } else {
+                payload = {
+                    method: "left",
+                    game: game,
+                    name: name
+                }
             }
 
             game.clients.forEach(c => {
                 clients[c.clientId].connection.send(JSON.stringify(payload))
             })
 
-        }
+            if (player.host) {
+                delete games[game.id]
+            }
+
+            }
         delete clients[clientId]
         console.log("Connection closed! Id: " + clientId)
     })
@@ -68,7 +81,8 @@ wsServer.on("request", request => {
                     }
                 ],
                 started: false,
-                userSelectColor: false
+                userSelectColor: false,
+                playerLimit: 4
             }
 
             const payLoad = {
@@ -85,7 +99,7 @@ wsServer.on("request", request => {
             const gameId = result.gameId;
             if (gameId in games) {
                 const game = games[gameId];
-                if (game.clients.length > 3) {
+                if (game.clients.length > (game.playerLimit - 1)) {
                     const payload = {
                         method: "joinError",
                         error: "This Room Is already Full!"
@@ -125,7 +139,7 @@ wsServer.on("request", request => {
             }
         }
         if (result.method === "updateName") {
-            const game = result.game
+            const game = games[result.gameId]
 
             game.clients[game.clients.findIndex(c => c.clientId === result.clientId)].name = result.name;
 
@@ -180,6 +194,18 @@ wsServer.on("request", request => {
             game.userSelectColor = result.able
             const payload = {
                 method: "updateUserSelectColor",
+                game: game
+            }
+            game.clients.forEach(c => {
+                clients[c.clientId].connection.send(JSON.stringify(payload))
+            })
+        }
+        if (result.method === "updatePlayerNumber") {
+            const game = games[result.gameId];
+            game.playerLimit = result.newNumber;
+
+            const payload = {
+                method: "updatePlayerNumber",
                 game: game
             }
             game.clients.forEach(c => {

@@ -22,7 +22,6 @@
     </v-app-bar>
 
     <v-main>
-      {{ game }}
       <v-tabs-items v-model="page" class="fill-height">
         <v-tab-item value="select" class="fill-height">
           <v-container class="fill-height justify-space-around flex-column">
@@ -87,7 +86,7 @@
         </v-tab-item>
         <v-tab-item v-if="game !== null" value="wait" class="fill-height">
           <v-container class="fill-height flex-column justify-center align-center" v-if="game !== null">
-            <v-progress-circular class="ma-6" indeterminate color="primary" size="100"/>
+            <LoaderXLVI class="ma-6"/>
             <h2>Waiting the host to start</h2>
             <h6 class="grey--text">Reload this page if you want to quit.</h6>
             <v-card class="pa-4 ma-4">
@@ -270,7 +269,7 @@ export default {
         clientId: this.clientId,
         method: "updateName",
         name: this.editName,
-        game: this.game
+        gameId: this.game.id
       }
       this.ws.send(JSON.stringify(payload))
     },
@@ -406,6 +405,16 @@ export default {
         this.errDia = true
       }
       if (res.method === "updateUserSelectColor") {
+        this.game = res.game
+
+      }
+      if (res.method === "close") {
+        this.err = "This game is closed by the host"
+        this.errDia = true
+        this.page = "select"
+        this.game = null
+      }
+      if (res.method === "updatePlayerNumber") {
         this.game = res.game
       }
     }

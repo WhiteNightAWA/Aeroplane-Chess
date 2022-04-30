@@ -16,6 +16,7 @@ export default {
 .c {
   width: 112px;
   height: 112px;
+  transform: rotate(45deg);
 }
 .c .box1,
 .c .box2,
