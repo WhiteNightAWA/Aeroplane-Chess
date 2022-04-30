@@ -15,7 +15,7 @@ export default {
       game: this.g
     }
   }
-}
+};
 </script>
 
 <style scoped>

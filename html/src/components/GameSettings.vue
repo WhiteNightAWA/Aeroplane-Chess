@@ -234,6 +234,14 @@ export default {
         gameId: this.game.id
       }
       this.$root.ws.send(JSON.stringify(payload))
+    },
+    ready: function () {
+      const payload = {
+        method: "ready",
+        settings: this.settings,
+        gameId: this.game.id
+      }
+      this.$root.ws.send(JSON.stringify(payload))
     }
   }
 }

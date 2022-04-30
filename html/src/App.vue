@@ -253,13 +253,14 @@ export default {
       snackbarMessage: "test",
       snackbarIcon: "check",
       messages: [],
-      urlHost: document.location.href,
-      myColor: "#ffffff",
+      urlHost: document.location.origin + document.location.pathname,
+      myColor: "#" + this.genRanHex(6),
       linking: true
     }
   },
 
   methods: {
+    genRanHex: size => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join(''),
     changeTheme: function () {
       this.$vuetify.theme.dark = !this.$vuetify.theme.dark
       window.localStorage.setItem("isDark", this.$vuetify.theme.dark.toString())
@@ -333,13 +334,13 @@ export default {
         this.snackbarMessage = "Connected to ws server!"
         this.snackbarColor = "success"
         this.snackbar = true
-
         // join link
         const params = Object.fromEntries(new URLSearchParams(window.location.search));
+        console.log(params);
         if (params.joinId !== undefined) {
           this.inputGameId = params.joinId
           this.join()
-          window.history.replaceState(null, null, "?");
+          window.history.replaceState({}, document.title, "/");
         }
       }
       if (res.method === "create") {
@@ -403,10 +404,10 @@ export default {
       if (res.method === "joinError") {
         this.err = res.error
         this.errDia = true
+        window.history.replaceState(null, null, " ");
       }
       if (res.method === "updateUserSelectColor") {
         this.game = res.game
-
       }
       if (res.method === "close") {
         this.err = "This game is closed by the host"

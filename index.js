@@ -15,15 +15,15 @@ const http = require("http");
 // });
 
 const SERVER_PORT = process.env.PORT || 9091;
-const websocketServer = require("websocket").server
+const websocketServer = require("websocket").server;
 const httpServer = http.createServer();
-httpServer.listen(SERVER_PORT, () => console.log("Listening.. on 9090"))
+httpServer.listen(SERVER_PORT, () => console.log("Listening.. on 9090"));
 const clients = {};
 const games = {};
 
 const wsServer = new websocketServer({
-    "httpServer": httpServer
-})
+    "httpServer": httpServer,
+});
 
 wsServer.on("request", request => {
     const connection = request.accept(null, request.origin);
@@ -35,41 +35,41 @@ wsServer.on("request", request => {
             const player = game.clients.find(c => c.clientId === clientId);
             const name = player.name;
 
-            game.clients = game.clients.filter(c => c.clientId !== clientId)
+            game.clients = game.clients.filter(c => c.clientId !== clientId);
 
             let payload = {};
             if (player.host) {
                 payload = {
-                    method: "close"
-                }
+                    method: "close",
+                };
             } else {
                 payload = {
                     method: "left",
                     game: game,
-                    name: name
-                }
+                    name: name,
+                };
             }
 
             game.clients.forEach(c => {
-                clients[c.clientId].connection.send(JSON.stringify(payload))
+                clients[c.clientId].connection.send(JSON.stringify(payload));
             })
 
             if (player.host) {
-                delete games[game.id]
+                delete games[game.id];
             }
 
             }
-        delete clients[clientId]
-        console.log("Connection closed! Id: " + clientId)
+        delete clients[clientId];
+        console.log("Connection closed! Id: " + clientId);
     })
     connection.on("message", message => {
-        const result = JSON.parse(message.utf8Data)
+        const result = JSON.parse(message.utf8Data);
 
         if (result.method === "create") {
             const gameId = guid();
-            const client = clients[result.clientId]
+            const client = clients[result.clientId];
 
-            client.game = gameId
+            client.game = gameId;
 
             games[gameId] = {
                 id: gameId,
@@ -82,123 +82,124 @@ wsServer.on("request", request => {
                 ],
                 started: false,
                 userSelectColor: false,
-                playerLimit: 4
-            }
+                playerLimit: 4,
+                settings: {},
+            };
 
             const payLoad = {
                 "method": "create",
-                "game" : games[gameId]
-            }
+                "game" : games[gameId],
+            };
 
             const con = clients[result.clientId].connection;
             con.send(JSON.stringify(payLoad));
         }
         if (result.method === "join") {
             const clientId = result.clientId;
-            const client = clients[clientId]
+            const client = clients[clientId];
             const gameId = result.gameId;
             if (gameId in games) {
                 const game = games[gameId];
                 if (game.clients.length > (game.playerLimit - 1)) {
                     const payload = {
                         method: "joinError",
-                        error: "This Room Is already Full!"
-                    }
-                    clients[clientId].connection.send(JSON.stringify(payload))
+                        error: "This Room Is already Full!",
+                    };
+                    clients[clientId].connection.send(JSON.stringify(payload));
                 } else if (game.started) {
                     const payload = {
                         method: "joinError",
-                        error: "This Room's game had already started!"
-                    }
-                    clients[clientId].connection.send(JSON.stringify(payload))
+                        error: "This Room's game had already started!",
+                    };
+                    clients[clientId].connection.send(JSON.stringify(payload));
                 } else {
-                    const name = generateName()
+                    const name = generateName();
                     game.clients.push({
                         clientId: clientId,
-                        name: name
-                    })
+                        name: name,
+                    });
 
-                    client.game = gameId
+                    client.game = gameId;
 
                     const payLoad = {
                         method: "join",
                         game: game,
-                        name: name
-                    }
+                        name: name,
+                    };
 
                     game.clients.forEach(c => {
-                        clients[c.clientId].connection.send(JSON.stringify(payLoad))
-                    })
+                        clients[c.clientId].connection.send(JSON.stringify(payLoad));
+                    });
                 }
             } else {
                 const payload = {
                     method: "joinError",
-                    error: "Void Game Id!"
-                }
-                clients[clientId].connection.send(JSON.stringify(payload))
+                    error: "Void Game Id!",
+                };
+                clients[clientId].connection.send(JSON.stringify(payload));
             }
         }
         if (result.method === "updateName") {
-            const game = games[result.gameId]
+            const game = games[result.gameId];
 
             game.clients[game.clients.findIndex(c => c.clientId === result.clientId)].name = result.name;
 
             const payload = {
                 method: "updateName",
                 game: game,
-                name: result.name
-            }
+                name: result.name,
+            };
 
             game.clients.forEach(c => {
-                clients[c.clientId].connection.send(JSON.stringify(payload))
-            })
+                clients[c.clientId].connection.send(JSON.stringify(payload));
+            });
 
         }
         if (result.method === "kick") {
-            const client = clients[result.clientId]
-            const game = games[result.gameId]
-            const clientId = result.clientId
+            const client = clients[result.clientId];
+            const game = games[result.gameId];
+            const clientId = result.clientId;
 
-            const name = game.clients.find(c => c.clientId === clientId).name
-            game.clients = game.clients.filter(c => c.clientId !== clientId)
+            const name = game.clients.find(c => c.clientId === clientId).name;
+            game.clients = game.clients.filter(c => c.clientId !== clientId);
 
             const payload = {
                 method: "kick",
                 game: game,
                 name: name,
-                clientId: result.clientId
-            }
+                clientId: result.clientId,
+            };
 
-            client.game = null
+            client.game = null;
 
-            client.connection.send(JSON.stringify(payload))
+            client.connection.send(JSON.stringify(payload));
             game.clients.forEach(c => {
-                clients[c.clientId].connection.send(JSON.stringify(payload))
-            })
+                clients[c.clientId].connection.send(JSON.stringify(payload));
+            });
         }
         if (result.method === "sendMessage") {
             const game = games[result.gameId];
-            const name = game.clients.find(c => c.clientId === clientId).name
+            const name = game.clients.find(c => c.clientId === clientId).name;
             const payload = {
                 method: "sendMessage",
                 id: result.id,
                 name: name,
-                message: result.message
-            }
+                message: result.message,
+            };
             game.clients.forEach(c => {
-                clients[c.clientId].connection.send(JSON.stringify(payload))
-            })
+                clients[c.clientId].connection.send(JSON.stringify(payload));
+            });
         }
         if (result.method === "updateUserSelectColor") {
             const game = games[result.gameId];
-            game.userSelectColor = result.able
+            game.userSelectColor = result.able;
             const payload = {
                 method: "updateUserSelectColor",
-                game: game
-            }
+                game: game,
+            };
             game.clients.forEach(c => {
-                clients[c.clientId].connection.send(JSON.stringify(payload))
-            })
+                clients[c.clientId].connection.send(JSON.stringify(payload));
+            });
         }
         if (result.method === "updatePlayerNumber") {
             const game = games[result.gameId];
@@ -206,11 +207,22 @@ wsServer.on("request", request => {
 
             const payload = {
                 method: "updatePlayerNumber",
-                game: game
-            }
+                game: game,
+            };
             game.clients.forEach(c => {
-                clients[c.clientId].connection.send(JSON.stringify(payload))
-            })
+                clients[c.clientId].connection.send(JSON.stringify(payload));
+            });
+        }
+        if (result.method === "ready") {
+            const game = games[result.gameId];
+            game.settings = result.settings;
+            const payload = {
+                method: "ready",
+                game: game,
+            };
+            game.clients.forEach(c => {
+                clients[c.clientId].connection.send(JSON.stringify(payload));
+            });
         }
     })
 
