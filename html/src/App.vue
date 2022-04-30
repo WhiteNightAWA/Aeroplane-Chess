@@ -22,6 +22,7 @@
     </v-app-bar>
 
     <v-main>
+      {{ game }}
       <v-tabs-items v-model="page" class="fill-height">
         <v-tab-item value="select" class="fill-height">
           <v-container class="fill-height justify-space-around flex-column">
@@ -46,9 +47,9 @@
             </v-card>
           </v-container>
         </v-tab-item>
-        <v-tab-item value="create" class="fill-height">
+        <v-tab-item v-if="game !== null" value="create" class="fill-height">
           <v-container class="fill-height justify-center flex-column">
-            <v-card class="pa-4 ma-4">
+            <v-card class="pa-4 ma-4" min-width="70%">
               <v-alert type="info" prominent>
                 Your game id will be
                 <code v-if="game !== null" style="user-select: none;">
@@ -65,6 +66,7 @@
                     label="Your name"
                     v-model="editName"
                     v-on:keyup.enter="updateName()"
+                    hide-details
                 >
                   <template v-slot:append-outer>
                     <v-btn
@@ -79,57 +81,15 @@
                   </template>
                 </v-text-field>
               </v-alert>
-
-              <v-expansion-panels>
-                <v-expansion-panel class="pa-4 ma-4">
-                  <v-expansion-panel-header>
-                    Game Settings
-                  </v-expansion-panel-header>
-                  <v-divider/>
-                  <v-expansion-panel-content>
-                    <v-form class="ma-3">
-                      <v-row>
-                        <v-col>
-                          <v-select
-                              :items="settings.games"
-                              v-model="settings.game"
-                              label="Game"
-                              filled
-                              hide-details
-                          />
-                        </v-col>
-                      </v-row>
-                      <v-row>
-                        <v-col cols="3">
-                          <v-text-field
-                            v-model="settings.playerNumbers"
-                            type="number"
-                            filled
-                            min="2"
-                            max="4"
-                            hide-details
-                          />
-                        </v-col>
-                        <v-col>
-                          <v-row>
-<!--                            <v-col-->
-<!--                              v-for="n in settings.num"-->
-<!--                              :key="n"-->
-<!--                            >-->
-<!--                              {{ JSON.stringify(n) }}-->
-<!--                            </v-col>-->
-                          </v-row>
-                        </v-col>
-                      </v-row>
-                    </v-form>
-                  </v-expansion-panel-content>
-                </v-expansion-panel>
-              </v-expansion-panels>
+              <GameSettings :g.sync="game" :c.sync="myColor"/>
             </v-card>
           </v-container>
         </v-tab-item>
-        <v-tab-item value="wait" class="fill-height">
+        <v-tab-item v-if="game !== null" value="wait" class="fill-height">
           <v-container class="fill-height flex-column justify-center align-center" v-if="game !== null">
+            <v-progress-circular class="ma-6" indeterminate color="primary" size="100"/>
+            <h2>Waiting the host to start</h2>
+            <h6 class="grey--text">Reload this page if you want to quit.</h6>
             <v-card class="pa-4 ma-4">
               <v-alert type="info" prominent>
                 Your game id will be
@@ -161,10 +121,17 @@
                   </template>
                 </v-text-field>
               </v-alert>
+              <v-alert v-if="game.userSelectColor" class="justify-center">
+                <v-row class="text-center">
+                  <h3>The host available you to select your color: </h3>
+                </v-row>
+                <v-row>
+                  <v-spacer/>
+                  <ColorPicker :c.sync="myColor"/>
+                  <v-spacer/>
+                </v-row>
+              </v-alert>
             </v-card>
-            <v-progress-circular class="ma-6" indeterminate color="primary" size="100"/>
-            <h2>Waiting the host to start</h2>
-            <h6 class="grey--text">Reload this page if you want to quit.</h6>
           </v-container>
         </v-tab-item>
       </v-tabs-items>
@@ -174,7 +141,7 @@
           class="fill-height"
         >
           <v-card-title class="white--text text-center">
-            {{err}}
+            {{ err }}
           </v-card-title>
         </v-card>
       </v-dialog>
@@ -191,17 +158,13 @@
                     v-for="u in game.clients"
                     :key="u.id"
                 >
-                  <v-list-item-icon>
-                    <v-icon
+                  <v-list-item-content>
+                    <v-list-item-title><v-icon
                         v-if="u.host"
                         color="yellow"
-                        large
                     >
                       mdi-crown
-                    </v-icon>
-                  </v-list-item-icon>
-                  <v-list-item-content>
-                    <v-list-item-title>{{ u.name }}</v-list-item-title>
+                    </v-icon>{{ u.name }}</v-list-item-title>
                     <v-list-item-subtitle>{{ u.clientId }}</v-list-item-subtitle>
                   </v-list-item-content>
                   <v-list-item-action>
@@ -232,18 +195,44 @@
           </v-btn>
         </template>
       </v-snackbar>
+      <v-fade-transition>
+        <v-overlay v-if="clientId === null" :opacity="0.75" :value="linking">
+          <v-row class="text-center justify-center align-center">
+            <h1 class="text-center">Connecting to the server...</h1>
+          </v-row>
+          <v-row style="height: 1em"/>
+          <v-row class="text-center justify-center align-center">
+            <LoaderXLVI/>
+          </v-row>
+          <v-row style="height: 1em"/>
+          <v-row class="text-center justify-center align-center">
+            <v-subheader>
+              This may took a few seconds
+              <br>
+              Try to reload this page is you stuck in this for > 1 minuses
+            </v-subheader>
+          </v-row>
+
+        </v-overlay>
+      </v-fade-transition>
     </v-main>
   </v-app>
 </template>
 
 <script>
 import ChatComp from "@/components/ChatComp";
+import GameSettings from "@/components/GameSettings";
+import ColorPicker from "@/components/ColorPicker";
+import LoaderXLVI from "@/components/LoaderXLVI";
 
 export default {
   name: 'App',
 
   components: {
-    ChatComp
+    ChatComp,
+    GameSettings,
+    ColorPicker,
+    LoaderXLVI
   },
 
   data() {
@@ -266,13 +255,8 @@ export default {
       snackbarIcon: "check",
       messages: [],
       urlHost: document.location.href,
-      settings: {
-        games: [
-          "Aeroplane Chess"
-        ],
-        game: "",
-        playerNumbers: 2,
-      }
+      myColor: "#ffffff",
+      linking: true
     }
   },
 
@@ -420,6 +404,9 @@ export default {
       if (res.method === "joinError") {
         this.err = res.error
         this.errDia = true
+      }
+      if (res.method === "updateUserSelectColor") {
+        this.game = res.game
       }
     }
 

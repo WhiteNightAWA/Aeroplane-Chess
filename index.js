@@ -67,7 +67,8 @@ wsServer.on("request", request => {
                         name: generateName()
                     }
                 ],
-                started: false
+                started: false,
+                userSelectColor: false
             }
 
             const payLoad = {
@@ -169,6 +170,17 @@ wsServer.on("request", request => {
                 id: result.id,
                 name: name,
                 message: result.message
+            }
+            game.clients.forEach(c => {
+                clients[c.clientId].connection.send(JSON.stringify(payload))
+            })
+        }
+        if (result.method === "updateUserSelectColor") {
+            const game = games[result.gameId];
+            game.userSelectColor = result.able
+            const payload = {
+                method: "updateUserSelectColor",
+                game: game
             }
             game.clients.forEach(c => {
                 clients[c.clientId].connection.send(JSON.stringify(payload))
